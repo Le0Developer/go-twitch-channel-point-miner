@@ -14,16 +14,19 @@ wget https://raw.githubusercontent.com/le0developer/go-twitch-channel-point-mine
 
 Adjust the configuration to your needs.
 
+Create an empty persistence file: `echo "{}" >> persistent.json`.
+
 Create a `docker-compose.yml` file:
 
 ```yaml
 services:
   tcpm:
-    image: ghcr.io/le0developer/go-twitch-channel-point-miner:latest
+    image: ghcr.io/le0developer/go-twitch-channel-point-miner:master
     restart: unless-stopped
     command: ["run", "--login"]
     volumes:
       - ./tcpm.yaml:/tcpm.yaml
+      - ./persistent.json:/persistent.json
       # The container does not have its own certificate store, so you'll need to mount the host's certificate store
       - /etc/ssl/certs:/etc/ssl/certs:ro
 ```

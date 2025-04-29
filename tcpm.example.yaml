@@ -25,7 +25,7 @@ predictions:
     # The maximum ratio of points to bet. For example if only 10k points are at stake, the bot would only bet 20k points with 2x
     # This is so you don't waste 250000 points on a prediction where you could only min 50 points
     max_ratio: 2
-    # The minimum amount of points to bet on a prediction (minimum is 10)
+    # The minimum amount of points you need to have before participating in a prediction. Use a combination of this with max_bet to prevent gambling away all your savings.
     min_points: 1000
     # Bet stealthily. Twitch shows the person who bet the most points on a prediction. This change it to only bet as much as the highest bet
     # Because if there are 2 people with the same amount of points, the one who bet first will be shown (not us)

@@ -1,0 +1,68 @@
+mine:
+    # Mine moments (https://help.twitch.tv/s/article/moments); unavailable since October 5th, 2024
+    moments: false
+    # Mine channel points (https://help.twitch.tv/s/article/channel-points); includes claiming rewards ("boxes") and streaks
+    # 10 points every 5 minutes (watching) + 50 points every 15 minutes (claim) => 320 points/hour
+    points: true
+    # Participate in raids. 250 points for each raid
+    raids: true
+    # Participate in predictions. See predictions section for more details
+    predictions: false
+    # Join the Twitch IRC chat. This will make 3rd-party bots (like Streamlabs) think you are watching the stream
+    watchtime: true
+
+points:
+    # How many streamers can be watched at the same time (limit is 2).
+    concurrent_stream_limit: 2
+    # Prioritize fresh streamers who we haven't watched before to claim the streak bonus first.
+    # Otherwise channels with *less* channel points are prioritized
+    prioritize_streaks: true
+
+# WARNING: Predictions are geo-blocked in some countries.
+predictions:
+    # The maximum amount of channel points to bet on a prediction (maximum is 250_000)
+    max_bet: 50000
+    # The maximum ratio of points to bet. For example if only 10k points are at stake, the bot would only bet 20k points with 2x
+    # This is so you don't waste 250000 points on a prediction where you could only min 50 points
+    max_ratio: 2
+    # The minimum amount of points to bet on a prediction (minimum is 10)
+    min_points: 1000
+    # Bet stealthily. Twitch shows the person who bet the most points on a prediction. This change it to only bet as much as the highest bet
+    # Because if there are 2 people with the same amount of points, the one who bet first will be shown (not us)
+    stealth: false
+    # Betting strategy:
+    #   - RANDOM: Bet on a random outcome
+    #   - MOST_POINTS: Bet on the outcome with the most points already bet
+    #   - MOST_INDIVIDUALS: Bet on the outcome with the most individual bets
+    #   - MOST_INDIVIDUAL_POINTS: Bet on the outcome with the highest individual point bet
+    #   - CAUTIOUS: This will track previous outcome results and use that information to bet on the outcome that has the highest return on investment
+    #               For example if we know that an outcome has a 25% chance of winning but currently only has 10% of the points bet on it, we will bet on that outcome
+    #               The minimum number of data points to track before betting is set in min_data_points
+    strategy: CAUTIOUS
+    # The minimum number of data points required for CAUTIOUS to bet on a prediction
+    min_data_points: 5
+
+# Persistence settings. This is currently only used for keeping track of past predictions
+persistent:
+  # Set to an empty string to disable persistence. It'll be in memory only
+  file: tcpm.json
+
+# Chat requires mine.watchtime to be true
+chat:
+    # Only join the chat of currently live streamers.
+    # There's a limit of 100 joined chats at the same time. If exceeded, you can't join chats yourself either.
+    # If you have less than 100 follows, you can disable this.
+    only_live: true 
+    # Follow chat spam (mostly emotes or polls). There's a lot of requirements to only follow actual chat spam:
+    #   1. No bot commands (message includes ! or +)
+    #   2. No links (message includes .)
+    #   3. Just one word
+    #   4. Less than 20 characters
+    #   5. Posted by at least 4 different users
+    #   6. At least 2 subscribers participated
+    #   7. Resets after 15s. Minimum cooldown between messages of 10s
+    follow_chat_spam: false
+
+# List of your Twitch accounts. Run the login command to get your token
+users:
+

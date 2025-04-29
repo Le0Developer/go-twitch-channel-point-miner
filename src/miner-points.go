@@ -32,23 +32,28 @@ func (miner *Miner) OnPointsUpdate(message WebsocketMessage) {
 	for _, user := range miner.Users {
 		if user.ID == userID {
 			miner.Lock.Lock()
-			streamer.Points[user] = int(balance.Balance)
+			streamer.Points[user] = balance.Balance
 			if event.Data.PointGain != nil && event.Data.PointGain.ReasonCode == "WATCH" {
 				streamer.GotPointsOnce[user] = true
 			}
 			miner.Lock.Unlock()
 		}
 	}
+
+	if event.Data.PointGain != nil {
+		miner.Alert(fmt.Sprintf("+%d points from %s (%s)", event.Data.PointGain.TotalPoints, event.Data.PointGain.ReasonCode, streamer.Username))
+	}
 }
 
 type pointsUpdateEvent struct {
 	Data struct {
 		Balance struct {
-			ChannelID string  `json:"channel_id"`
-			Balance   float64 `json:"balance"`
+			ChannelID string `json:"channel_id"`
+			Balance   int    `json:"balance"`
 		} `json:"balance"`
 		PointGain *struct {
-			ReasonCode string `json:"reason_code"`
+			ReasonCode  string `json:"reason_code"`
+			TotalPoints int    `json:"total_points"`
 		} `json:"point_gain"`
 	} `json:"data"`
 }

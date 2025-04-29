@@ -21,7 +21,7 @@ func (gql *GraphQL) LoadChannelPoints(streamer *Streamer) error {
 
 	communityPoints := res.Data.Community.Channel.Self.CommunityPoints
 	gql.User.Miner.Lock.Lock()
-	streamer.Points[gql.User] = int(communityPoints.Balance)
+	streamer.Points[gql.User] = communityPoints.Balance
 	gql.User.Miner.Lock.Unlock()
 
 	if communityPoints.AvailableClaim != nil {
@@ -39,7 +39,7 @@ type channelPointsContextResponse struct {
 			Channel struct {
 				Self struct {
 					CommunityPoints struct {
-						Balance        float64 `json:"balance"`
+						Balance        int `json:"balance"`
 						AvailableClaim *struct {
 							ID string `json:"id"`
 						} `json:"availableClaim"`

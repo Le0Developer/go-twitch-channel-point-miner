@@ -50,6 +50,7 @@ func initConfig() {
 	viper.SetDefault("predictions.min_data_points", 5)
 	viper.SetDefault("points.concurrent_stream_limit", 2)
 	viper.SetDefault("points.prioritize_streaks", true)
+	viper.SetDefault("points.strategy", miner.MiningStrategyLeastPoints)
 	viper.SetDefault("chat.only_live", true)
 	viper.SetDefault("chat.follow_chat_spam", false)
 	viper.SetDefault("persistent.file", "persistent.json")

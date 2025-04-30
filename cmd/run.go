@@ -35,6 +35,7 @@ var (
 				MinePoints:            viper.GetBool("mine.points"),
 				PrioritizeStreaks:     viper.GetBool("points.prioritize_streaks"),
 				ConcurrentStreamLimit: viper.GetInt("points.concurrent_stream_limit"),
+				MiningStrategy:        miner.MiningStrategy(viper.GetString("points.strategy")),
 				MineRaids:             viper.GetBool("mine.raids"),
 				MineMoments:           viper.GetBool("mine.moments"),
 				MinePredictions:       viper.GetBool("mine.predictions"),

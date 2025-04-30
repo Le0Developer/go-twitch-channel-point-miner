@@ -12,11 +12,17 @@ mine:
     watchtime: true
 
 points:
-    # How many streamers can be watched at the same time (limit is 2).
+    # How many streamers can be watched at the same time (limit is 2). 0 or negative values for unlimited
     concurrent_stream_limit: 2
     # Prioritize fresh streamers who we haven't watched before to claim the streak bonus first.
     # Otherwise channels with *less* channel points are prioritized
     prioritize_streaks: true
+    # Who to watch first. Streamers will be sorted according to this criteria and then the first streamers up until the concurrent_stream_limit will be watched
+    # Strategies:
+    #   - LEAST_POINTS: Watch the streamers with the least amount of channel points
+    #   - MOST_POINTS: Watch the streamers with the most amount of channel points
+    #   - MOST_VIEWERS: Watch the streamers with the most viewers
+    strategy: LEAST_POINTS
 
 # WARNING: Predictions are geo-blocked in some countries.
 predictions:

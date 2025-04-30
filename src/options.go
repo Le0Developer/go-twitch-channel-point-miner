@@ -4,6 +4,7 @@ type Options struct {
 	MinePoints            bool
 	PrioritizeStreaks     bool
 	ConcurrentStreamLimit int
+	MiningStrategy        MiningStrategy
 
 	MineRaids   bool
 	MineMoments bool

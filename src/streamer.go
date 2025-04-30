@@ -10,6 +10,7 @@ type Streamer struct {
 	GotPointsOnce map[*User]bool
 	BroadcastID   string
 
+	Viewers      int
 	LastLivePing time.Time
 	WasLive      bool
 

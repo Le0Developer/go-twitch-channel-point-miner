@@ -90,6 +90,14 @@ type claimAvailableEvent struct {
 	} `json:"data"`
 }
 
+type MiningStrategy = string
+
+const (
+	MiningStrategyLeastPoints MiningStrategy = "LEAST_POINTS"
+	MiningStrategyMostPoints  MiningStrategy = "MOST_POINTS"
+	MiningStrategyMostViewers MiningStrategy = "MOST_VIEWERS"
+)
+
 func (miner *Miner) MinePoints(user *User) error {
 	streamers := make([]*Streamer, 0, len(user.Streamers))
 	for _, streamer := range user.Streamers {
@@ -104,8 +112,15 @@ func (miner *Miner) MinePoints(user *User) error {
 			}
 			return -1
 		}
-		// alternatively, mine whoever has the lowest points
-		return cmp.Compare(a.Points[user], b.Points[user])
+		switch miner.Options.MiningStrategy {
+		case MiningStrategyMostViewers:
+			return cmp.Compare(b.Viewers, a.Viewers)
+		case MiningStrategyMostPoints:
+			return cmp.Compare(b.Points[user], a.Points[user])
+		case MiningStrategyLeastPoints:
+			return cmp.Compare(a.Points[user], b.Points[user])
+		}
+		panic("invalid mining strategy")
 	})
 
 	for _, streamer := range streamers {

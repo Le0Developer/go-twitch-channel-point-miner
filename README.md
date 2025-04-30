@@ -40,15 +40,50 @@ docker compose up -d
 Follow the logs using `docker compose logs -f tcpm` to see if the miner is working correctly.
 You probably need to login if this is your first time running it. Simply follow the instructions in the logs if this is the case.
 
+##### Updating
+
+To update the miner, simply run `docker compose pull` and then `docker compose up -d` again.
+
+### Using `go install`
+
+1. Install [Go 1.20 or later](https://go.dev/doc/install)
+2. Run `go install github.com/le0developer/go-twitch-channel-point-miner@latest`
+3. The executable will be globally available as `go-twitch-channel-point-miner`
+
+Now follow the instructions in the [Configuration](#configuration) section to configure the miner.
+
+##### Updating
+
+To update the miner, simply run `go install github.com/le0developer/go-twitch-channel-point-miner@latest` again.
+
 ### Using the binary
 
 1. Install [Go 1.20 or later](https://go.dev/doc/install)
 2. Clone the repository using [`git clone`](https://git-scm.com/docs/git-clone) (`git clone https://github.com/le0developer/go-twitch-channel-point-miner.git`) or download the repository as a ZIP file.
-3. Run `go build -o tcpm .` in the TCPM directory.
+3. Run `go build .` in the TCPM directory.
+4. The executable will be available as `go-twitch-channel-point-miner` in the current directory.
 
-Now that you have the binary, you can start using the miner.
+Now follow the instructions in the [Configuration](#configuration) section to configure the miner.
 
-1. Rename `tcpm.example.yaml` to `tcpm.yaml` and adjust the configuration to your needs.
-2. Run `./tcpm login` to login to your Twitch account. Follow the instructions to login.
-3. Then paste the login credentials to the end of the configuration file.
-4. Run `./tcpm run` to start the miner.
+##### Updating
+
+If you cloned the repository, simply run `git pull` to update the repository and then run `go build .` again to build the latest version.  
+If you downloaded the ZIP file, you will need to download it again and build it again.
+
+## Configuration
+
+Download the [`tcpm.example.yaml`](./tcpm.example.yaml) file and place as `tcpm.yaml` it in your current directory.
+
+Go through the configuration file and adjust the settings to your needs.
+
+## Logging in
+
+Run `./go-twitch-channel-point-miner login -u {TWITCH_USERNAME}` to login to your Twitch account.
+This will prompt you to go to `https://www.twitch.tv/activate` and enter a code.
+
+After authorization, the miner will spit out your login credentials in the terminal.
+Append these credentials to the end of the `tcpm.yaml` file.
+
+## Notificatons
+
+Work in progress.

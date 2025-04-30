@@ -45,7 +45,7 @@ predictions:
 # Persistence settings. This is currently only used for keeping track of past predictions
 persistent:
   # Set to an empty string to disable persistence. It'll be in memory only
-  file: tcpm.json
+  file: persistent.json
 
 # Chat requires mine.watchtime to be true
 chat:

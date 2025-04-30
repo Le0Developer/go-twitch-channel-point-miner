@@ -12,12 +12,15 @@ mine:
     watchtime: true
 
 points:
-    # How many streamers can be watched at the same time (limit is 2). 0 or negative values for unlimited
-    concurrent_stream_limit: 2
+    # How many streamers will be mined for points at the same time (Twitch enforces a limit of 2). Negative values for unlimited (not recommended)
+    concurrent_point_limit: 2
+    # How many streamers will ADDITIONALLY be watched. Unlike `mine.watchtime`, this is for Twitch's watchtime and will contribute to your watchtime (eg on recaps).
+    # This will not contribute to your channel points.
+    # 0 is disabled, negative values for unlimited. Keeping this disabled is recommended for now. [EXPERIMENTAL]
+    concurrent_watch_limit: 0
     # Prioritize fresh streamers who we haven't watched before to claim the streak bonus first.
-    # Otherwise channels with *less* channel points are prioritized
     prioritize_streaks: true
-    # Who to watch first. Streamers will be sorted according to this criteria and then the first streamers up until the concurrent_stream_limit will be watched
+    # Who to watch first. Streamers will be sorted according to this criteria and then processed in order
     # Strategies:
     #   - LEAST_POINTS: Watch the streamers with the least amount of channel points
     #   - MOST_POINTS: Watch the streamers with the most amount of channel points

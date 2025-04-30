@@ -34,7 +34,8 @@ var (
 			options := miner.Options{
 				MinePoints:            viper.GetBool("mine.points"),
 				PrioritizeStreaks:     viper.GetBool("points.prioritize_streaks"),
-				ConcurrentStreamLimit: viper.GetInt("points.concurrent_stream_limit"),
+				ConcurrentPointLimit:  viper.GetInt("points.concurrent_point_limit"),
+				ConcurrentWatchLimit:  viper.GetInt("points.concurrent_watch_limit"),
 				MiningStrategy:        miner.MiningStrategy(viper.GetString("points.strategy")),
 				MineRaids:             viper.GetBool("mine.raids"),
 				MineMoments:           viper.GetBool("mine.moments"),

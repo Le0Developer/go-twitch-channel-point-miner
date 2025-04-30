@@ -130,20 +130,30 @@ func (miner *Miner) MinePoints(user *User) error {
 	}
 
 	mined := 0
+	watched := 0
 	for _, streamer := range streamers {
 		// no points => points disabled usually. TODO: better check if points are disabled
-		if !streamer.IsLive() || streamer.Points[user] == 0 {
+		if !streamer.IsLive() {
 			continue
 		}
-		if miner.Options.ConcurrentStreamLimit > 0 && mined >= miner.Options.ConcurrentStreamLimit {
+		if miner.Options.ConcurrentPointLimit < 0 || mined < miner.Options.ConcurrentPointLimit {
+			if streamer.Points[user] == 0 {
+				continue
+			}
+			if err := miner.minePoints(streamer, user); err != nil {
+				fmt.Println("Error mining points for", streamer.Username, ":", err)
+				continue
+			}
+			mined++
+		} else if miner.Options.ConcurrentWatchLimit < 0 || watched < miner.Options.ConcurrentWatchLimit {
+			if err := miner.minePointsPlayback(streamer, user); err != nil {
+				fmt.Println("Error mining points for", streamer.Username, ":", err)
+				continue
+			}
+			watched++
+		} else {
 			break
 		}
-
-		if err := miner.minePoints(streamer, user); err != nil {
-			fmt.Println("Error mining points for", streamer.Username, ":", err)
-			continue
-		}
-		mined++
 	}
 
 	return nil
@@ -162,7 +172,7 @@ func (miner *Miner) minePoints(streamer *Streamer, user *User) error {
 
 // send a request to the current HLS playlist to make them think we're watching
 func (miner *Miner) minePointsPlayback(streamer *Streamer, user *User) error {
-	// get auth token
+	// TODO: access tokens are valid for ~20mins, we should cache them
 	signature, value, err := user.GraphQL.PlaybackAccessToken(streamer)
 	if err != nil {
 		return fmt.Errorf("failed to get playback access token: %w", err)
@@ -214,13 +224,13 @@ func (miner *Miner) minePointsPlayback(streamer *Streamer, user *User) error {
 		return fmt.Errorf("failed to read response: %w", err)
 	}
 
-	// get the last segment
-	segments := strings.Split(string(responseText), "\n")
-	segmentURL := segments[len(segments)-2]
-
 	if response.StatusCode != http.StatusOK {
 		return fmt.Errorf("failed to mine points, status code: %d", response.StatusCode)
 	}
+
+	// get the last segment
+	segments := strings.Split(string(responseText), "\n")
+	segmentURL := segments[len(segments)-2]
 
 	// send a HEAD request to the segment
 	request, err = http.NewRequest("HEAD", segmentURL, nil)
@@ -232,13 +242,13 @@ func (miner *Miner) minePointsPlayback(streamer *Streamer, user *User) error {
 	response, err = user.GraphQL.Client.Do(request)
 	response.Body.Close()
 
-	fmt.Println("Mined points for", streamer.Username, "on playback", segmentURL)
 	if err != nil {
 		return fmt.Errorf("failed to send request: %w", err)
 	}
 	if response.StatusCode != http.StatusOK {
 		return fmt.Errorf("failed to mine points, status code: %d", response.StatusCode)
 	}
+	fmt.Println("Mined points for", streamer.Username, "on playback", segmentURL)
 	return nil
 }
 

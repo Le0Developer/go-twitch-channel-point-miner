@@ -1,10 +1,11 @@
 package miner
 
 type Options struct {
-	MinePoints            bool
-	PrioritizeStreaks     bool
-	ConcurrentStreamLimit int
-	MiningStrategy        MiningStrategy
+	MinePoints           bool
+	PrioritizeStreaks    bool
+	ConcurrentPointLimit int
+	ConcurrentWatchLimit int
+	MiningStrategy       MiningStrategy
 
 	MineRaids   bool
 	MineMoments bool

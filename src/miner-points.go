@@ -112,6 +112,13 @@ func (miner *Miner) MinePoints(user *User) error {
 			}
 			return -1
 		}
+		aPrio := miner.Options.StreamerPriority[a.Username]
+		bPrio := miner.Options.StreamerPriority[b.Username]
+
+		if aPrio != bPrio {
+			return cmp.Compare(aPrio, bPrio)
+		}
+
 		switch miner.Options.MiningStrategy {
 		case MiningStrategyMostViewers:
 			return cmp.Compare(b.Viewers, a.Viewers)

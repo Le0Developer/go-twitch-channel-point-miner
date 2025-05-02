@@ -20,7 +20,8 @@ points:
     concurrent_watch_limit: 0
     # Prioritize fresh streamers who we haven't watched before to claim the streak bonus first.
     prioritize_streaks: true
-    # Who to watch first. Streamers will be sorted according to this criteria and then processed in order
+    # Who to watch first. Streamers will be sorted according to this criteria and then processed in order.
+    # Streamers with higher priority (according to streamers.streamers) will be processed before ones with lower priority.
     # Strategies:
     #   - LEAST_POINTS: Watch the streamers with the least amount of channel points
     #   - MOST_POINTS: Watch the streamers with the most amount of channel points
@@ -71,6 +72,15 @@ chat:
     #   6. At least 2 subscribers participated
     #   7. Resets after 15s. Minimum cooldown between messages of 10s
     follow_chat_spam: false
+
+# Which streamers to mine. Applies to all features.
+streamers:
+  # Automatically mine everyone you're following with a neutral priority (0).
+  follows: true
+  # Additional streamers to mine. You can also specify streames that are you're following in order to override the priority.
+  # For example: You can set eslcs to -1 priority to priotize everyone else.
+  #   eslcs: -1
+  streamers:
 
 # List of your Twitch accounts. Run the login command to get your token
 users:

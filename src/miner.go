@@ -24,7 +24,7 @@ type Miner struct {
 	Lock sync.Mutex
 }
 
-func (miner *Miner) AddUser(user *User) error {
+func (miner *Miner) AddUser(user *User) {
 	user.Miner = miner
 
 	miner.Users[user.Username] = user
@@ -35,57 +35,63 @@ func (miner *Miner) AddUser(user *User) error {
 	if user.ID == "" {
 		user.ID, _ = user.GraphQL.GetSteamerID(user.Username)
 	}
+}
 
+func (miner *Miner) AddStreamersFromFollows(user *User) error {
 	follows, err := user.GraphQL.GetFollows()
 	if err != nil {
 		return err
 	}
 
-	// using a waitgroup here because AddStreamer does a network request per streamer
-	streamerch := make(chan *Streamer, len(follows))
-	for _, follow := range follows {
-		go func(follow string) {
-			streamer := miner.AddStreamer(follow, user)
-			err := user.GraphQL.LoadChannelPoints(streamer)
-			if err != nil {
-				fmt.Println("Error loading channel points", err)
-			}
-			streamerch <- streamer
-		}(follow)
-	}
-
-	streamers := map[string]*Streamer{}
-	for streamer := range streamerch {
-		streamers[streamer.Username] = streamer
-		if _, ok := miner.Streamers[streamer.Username]; !ok {
-			miner.Streamers[streamer.Username] = streamer
-		}
-		if len(streamers) == len(follows) {
-			close(streamerch)
-		}
-	}
-	user.Streamers = streamers
-
+	miner.BulkAddStreamers(user, follows)
 	return nil
 }
 
+func (miner *Miner) BulkAddStreamers(user *User, streamers []string) {
+	wg := sync.WaitGroup{}
+	for _, streamer := range streamers {
+		wg.Add(1)
+		go func(streamer string) {
+			defer wg.Done()
+			miner.AddStreamer(streamer, user)
+		}(streamer)
+	}
+
+	wg.Wait()
+}
+
 func (miner *Miner) AddStreamer(username string, user *User) *Streamer {
+	var streamer *Streamer
+
 	if existing, ok := miner.Streamers[username]; ok {
-		return existing
-	}
+		streamer = existing
+		miner.Lock.Lock()
+	} else {
+		id, err := user.GraphQL.GetSteamerID(username)
+		if err != nil {
+			// TODO: make this return an error
+			panic(err)
+		}
 
-	id, err := user.GraphQL.GetSteamerID(username)
-	if err != nil {
-		panic(err)
-	}
+		streamer = &Streamer{
+			Username:      username,
+			ID:            id,
+			Points:        map[*User]int{},
+			GotPointsOnce: map[*User]bool{},
+		}
 
-	streamer := &Streamer{
-		Username:      username,
-		ID:            id,
-		Points:        map[*User]int{},
-		GotPointsOnce: map[*User]bool{},
-	}
+		// thankfully this doesnt rely on miner.Streamers, so we dont need to lock yet
+		if err = user.GraphQL.LoadChannelPoints(streamer); err != nil {
+			fmt.Println("Error loading channel points", err)
+		}
 
+		miner.Lock.Lock()
+		miner.Streamers[username] = streamer
+	}
+	defer miner.Lock.Unlock()
+	if _, ok := user.Streamers[username]; !ok {
+		user.Streamers[username] = streamer
+	}
 	return streamer
 }
 

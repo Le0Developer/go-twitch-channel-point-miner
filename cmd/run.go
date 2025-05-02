@@ -19,8 +19,8 @@ var (
 		Long:  "Run the Twitch Channel Point Miner with the specified configuration.",
 
 		Run: func(cmd *cobra.Command, args []string) {
-			users := viper.Get("users").([]any)
-			if len(users) == 0 {
+			usersObjs := viper.Get("users").([]any)
+			if len(usersObjs) == 0 {
 				cmd.PrintErrln("No users found in the configuration file.")
 				if !autoLogin {
 					cmd.PrintErrln("Please run the login command to add users.")
@@ -49,13 +49,32 @@ var (
 				MineWatchtime:         viper.GetBool("mine.watchtime"),
 				WatchTimeOnlyLive:     viper.GetBool("chat.only_live"),
 				FollowChatSpam:        viper.GetBool("chat.follow_chat_spam"),
+				StreamerPriority:      map[string]int{},
 				DebugWebhook:          viper.GetString("debug.webhook"),
 				PersistentFile:        viper.GetString("persistent.file"),
 			}
+			addFollowers := viper.GetBool("streamers.follows")
 			instance := miner.NewMiner(options)
-			for _, user := range users {
-				user := user.(map[string]any)
-				instance.AddUser(miner.NewUser(user["name"].(string), user["token"].(string)))
+			users := []*miner.User{}
+			for _, user := range usersObjs {
+				userObj := user.(map[string]any)
+				user := miner.NewUser(userObj["name"].(string), userObj["token"].(string))
+				users = append(users, user)
+				instance.AddUser(user)
+				if addFollowers {
+					instance.AddStreamersFromFollows(user)
+				}
+			}
+			priorities, ok := viper.Get("streamers.streamers").(map[string]int)
+			if ok {
+				options.StreamerPriority = priorities
+				streamers := make([]string, 0, len(priorities))
+				for k := range priorities {
+					streamers = append(streamers, k)
+				}
+				for _, user := range users {
+					instance.BulkAddStreamers(user, streamers)
+				}
 			}
 			err := instance.Run()
 			cobra.CheckErr(err)

@@ -6,6 +6,7 @@ type Options struct {
 	ConcurrentPointLimit int
 	ConcurrentWatchLimit int
 	MiningStrategy       MiningStrategy
+	StreamerPriority     map[string]int
 
 	MineRaids   bool
 	MineMoments bool

@@ -54,6 +54,8 @@ func initConfig() {
 	viper.SetDefault("points.strategy", miner.MiningStrategyLeastPoints)
 	viper.SetDefault("chat.only_live", true)
 	viper.SetDefault("chat.follow_chat_spam", false)
+	viper.SetDefault("streamers.follows", true)
+	viper.SetDefault("streamers.streamers", map[string]int{})
 	viper.SetDefault("persistent.file", "persistent.json")
 
 	viper.AutomaticEnv()

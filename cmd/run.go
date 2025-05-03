@@ -65,12 +65,12 @@ var (
 					instance.AddStreamersFromFollows(user)
 				}
 			}
-			priorities, ok := viper.Get("streamers.streamers").(map[string]int)
+			priorities, ok := viper.Get("streamers.streamers").(map[string]any)
 			if ok {
-				options.StreamerPriority = priorities
 				streamers := make([]string, 0, len(priorities))
 				for k := range priorities {
 					streamers = append(streamers, k)
+					options.StreamerPriority[k] = priorities[k].(int)
 				}
 				for _, user := range users {
 					instance.BulkAddStreamers(user, streamers)

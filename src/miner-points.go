@@ -235,27 +235,29 @@ func (miner *Miner) minePointsPlayback(streamer *Streamer, user *User) error {
 		return fmt.Errorf("failed to mine points, status code: %d", response.StatusCode)
 	}
 
+	// Apparently we dont need to request the segment
 	// get the last segment
-	segments := strings.Split(string(responseText), "\n")
-	segmentURL := segments[len(segments)-2]
-
-	// send a HEAD request to the segment
-	request, err = http.NewRequest("HEAD", segmentURL, nil)
-	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
-	}
-
-	request.Header.Set("User-Agent", userAgent)
-	response, err = user.GraphQL.Client.Do(request)
-	response.Body.Close()
-
-	if err != nil {
-		return fmt.Errorf("failed to send request: %w", err)
-	}
-	if response.StatusCode != http.StatusOK {
-		return fmt.Errorf("failed to mine points, status code: %d", response.StatusCode)
-	}
-	fmt.Println("Mined points for", streamer.Username, "on playback", segmentURL)
+	// segments := strings.Split(string(responseText), "\n")
+	// segmentURL := segments[len(segments)-2]
+	//
+	// // send a HEAD request to the segment
+	// request, err = http.NewRequest("HEAD", segmentURL, nil)
+	// if err != nil {
+	// 	return fmt.Errorf("failed to create request: %w", err)
+	// }
+	//
+	// request.Header.Set("User-Agent", userAgent)
+	// response, err = user.GraphQL.Client.Do(request)
+	// response.Body.Close()
+	//
+	// if err != nil {
+	// 	return fmt.Errorf("failed to send request: %w", err)
+	// }
+	// if response.StatusCode != http.StatusOK {
+	// 	return fmt.Errorf("failed to mine points, status code: %d", response.StatusCode)
+	// }
+	// fmt.Println("Mined points for", streamer.Username, "on playback", segmentURL)
+	fmt.Println("Mined points for", streamer.Username, "on playback")
 	return nil
 }
 

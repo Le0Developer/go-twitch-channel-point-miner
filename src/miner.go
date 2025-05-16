@@ -65,7 +65,6 @@ func (miner *Miner) AddStreamer(username string, user *User) *Streamer {
 
 	if existing, ok := miner.Streamers[username]; ok {
 		streamer = existing
-		miner.Lock.Lock()
 	} else {
 		id, err := user.GraphQL.GetSteamerID(username)
 		if err != nil {
@@ -79,16 +78,16 @@ func (miner *Miner) AddStreamer(username string, user *User) *Streamer {
 			Points:        map[*User]int{},
 			GotPointsOnce: map[*User]bool{},
 		}
-
-		// thankfully this doesnt rely on miner.Streamers, so we dont need to lock yet
-		if err = user.GraphQL.LoadChannelPoints(streamer); err != nil {
-			fmt.Println("Error loading channel points", err)
-		}
-
-		miner.Lock.Lock()
-		miner.Streamers[username] = streamer
 	}
+
+	if err := user.GraphQL.LoadChannelPoints(streamer); err != nil {
+		fmt.Println("Error loading channel points", err)
+	}
+
+	miner.Lock.Lock()
 	defer miner.Lock.Unlock()
+
+	miner.Streamers[username] = streamer
 	if _, ok := user.Streamers[username]; !ok {
 		user.Streamers[username] = streamer
 	}

@@ -97,21 +97,23 @@ var (
 )
 
 func (p *Prediction) SmartBet() {
-	betID := ""
+	var bet predictionOutcome
 
 	totalPointsBet := 0
 	for _, outcome := range p.Event.Outcomes {
 		totalPointsBet += outcome.TotalPoints
 	}
 
+	betAmount := p.Miner.Options.PredictionsMaxBet
+
 	switch p.Miner.Options.PredictionsStrategy {
 	case PredictionStrategyRandom:
-		betID = p.Event.Outcomes[rand.Intn(len(p.Event.Outcomes))].ID
+		bet = p.Event.Outcomes[rand.Intn(len(p.Event.Outcomes))]
 	case PredictionStrategyMostPoints:
 		mostPoints := 0
 		for _, outcome := range p.Event.Outcomes {
 			if outcome.TotalPoints > mostPoints {
-				betID = outcome.ID
+				bet = outcome
 				mostPoints = outcome.TotalPoints
 			}
 		}
@@ -119,7 +121,7 @@ func (p *Prediction) SmartBet() {
 		mostIndividuals := 0
 		for _, outcome := range p.Event.Outcomes {
 			if outcome.TotalUsers > mostIndividuals {
-				betID = outcome.ID
+				bet = outcome
 				mostIndividuals = outcome.TotalUsers
 			}
 		}
@@ -128,7 +130,7 @@ func (p *Prediction) SmartBet() {
 		for _, outcome := range p.Event.Outcomes {
 			for _, better := range outcome.TopPredictors {
 				if better.Points > mostIndividualPoints {
-					betID = outcome.ID
+					bet = outcome
 					mostIndividualPoints = better.Points
 				}
 			}
@@ -156,26 +158,33 @@ func (p *Prediction) SmartBet() {
 				// eg if an option wins 1/3 of the time but only has 25% odds, we bet on it
 				// since it's a 1/3 chance to win 4x our bet
 				bestROI := 0.0
+				pointDiff := 0
 				for _, outcome := range p.Event.Outcomes {
 					timesWon := data[outcome.Title]
 					expectedWinrate := float64(timesWon) / float64(total)
 					currentWinrate := float64(outcome.TotalPoints) / float64(totalPointsBet)
+					expectedPointsBet := int(float64(totalPointsBet) * expectedWinrate)
 					roi := expectedWinrate / currentWinrate
-					fmt.Printf("Winrate: %f, CurrentWinrate: %f, ROI: %f\n", expectedWinrate, currentWinrate, roi)
+					fmt.Printf("ExpectedWinrate: %f (%d), CurrentWinrate: %f (%d), ROI: %f\n", expectedWinrate, expectedPointsBet, currentWinrate, outcome.TotalPoints, roi)
 					if roi > bestROI {
 						bestROI = roi
-						betID = outcome.ID
+						bet = outcome
+						pointDiff = expectedPointsBet - outcome.TotalPoints
 					}
+				}
+
+				// cap bets so we dont bet more than the expected winrate
+				if pointDiff < betAmount {
+					betAmount = pointDiff
 				}
 			}
 		}
 	}
 
-	if betID == "" {
+	if bet.ID == "" {
 		return
 	}
 
-	betAmount := p.Miner.Options.PredictionsMaxBet
 	if betAmount > totalPointsBet*p.Miner.Options.PredictionsMaxRatio {
 		betAmount = totalPointsBet * p.Miner.Options.PredictionsMaxRatio
 	}
@@ -184,14 +193,9 @@ func (p *Prediction) SmartBet() {
 		// dont bet more than the highest individual bet
 		// the highest individual bet is displayed publicly to everyone
 		highestIndividualBet := 0
-		for _, outcome := range p.Event.Outcomes {
-			if outcome.ID != betID {
-				continue
-			}
-			for _, better := range outcome.TopPredictors {
-				if better.Points > highestIndividualBet {
-					highestIndividualBet = better.Points
-				}
+		for _, better := range bet.TopPredictors {
+			if better.Points > highestIndividualBet {
+				highestIndividualBet = better.Points
 			}
 		}
 
@@ -214,9 +218,9 @@ func (p *Prediction) SmartBet() {
 			continue
 		}
 
-		fmt.Printf("Betting %d points on %s for %s\n", userBet, betID, p.Event.Title)
-		p.Miner.Alert(fmt.Sprintf("Betting %d points on %s for %s\n", userBet, betID, p.Event.Title))
-		if err := user.GraphQL.MakePrediction(p.Event.ID, betID, userBet); err != nil {
+		fmt.Printf("Betting %d points on %s (%s) for %s\n", userBet, bet.Title, bet.ID, p.Event.Title)
+		p.Miner.Alert(fmt.Sprintf("Betting %d points on %s (%s) for %s\n", userBet, bet.Title, bet.ID, p.Event.Title))
+		if err := user.GraphQL.MakePrediction(p.Event.ID, bet.ID, userBet); err != nil {
 			fmt.Println("Failed to place bet", err)
 			continue
 		}

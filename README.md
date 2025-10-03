@@ -87,3 +87,87 @@ Append these credentials to the end of the `tcpm.yaml` file.
 ## Notificatons
 
 Work in progress.
+
+## Monitoring with Prometheus and Grafana
+
+The miner includes a built-in Prometheus exporter that exposes metrics about your channel points, streamers, and viewing activity. This allows you to visualize your mining progress over time using Grafana or other monitoring tools.
+
+### Available Metrics
+
+The following metrics are exposed at the `/metrics` endpoint:
+
+- **`twitch_channel_points`** - Current channel points for each user-streamer combination
+  - Labels: `username`, `streamer`, `streamer_id`
+- **`twitch_streamer_viewers`** - Current viewer count for each streamer
+  - Labels: `streamer`, `streamer_id`
+- **`twitch_streamer_live`** - Whether a streamer is currently live (1) or not (0)
+  - Labels: `streamer`, `streamer_id`
+- **`twitch_total_streamers`** - Total number of streamers being monitored
+- **`twitch_total_users`** - Total number of users configured
+
+### Configuration
+
+Enable the Prometheus exporter in your `tcpm.yaml` configuration file:
+
+```yaml
+prometheus:
+    # Enable Prometheus metrics exporter
+    enabled: true
+    # Port to serve Prometheus metrics on
+    port: 8080
+    # Host/interface to bind to (default: localhost for security)
+    # Use "localhost" or "127.0.0.1" to only allow local connections (recommended)
+    # Use "0.0.0.0" or "" to listen on all interfaces (publicly accessible unless firewalled)
+    host: localhost
+```
+
+After enabling, the metrics will be available at `http://localhost:8080/metrics` (or whatever host:port you configured).
+
+> [!TIP]
+> If you're running the miner in Docker, make sure to expose the Prometheus port in your `docker-compose.yml` file.
+> Only if you want to access it from outside the container.
+
+> [!WARNING]
+> If you expose the metrics endpoint to the public internet, be aware that it may leak sensitive information about your Twitch account and activity. It is recommended to bind the exporter to `localhost` or use firewall rules to restrict access.
+
+### Prometheus Configuration
+
+Add the miner as a scrape target in your `prometheus.yml`:
+
+```yaml
+scrape_configs:
+  - job_name: tcpm
+    static_configs:
+      - targets: ["HOST:PORT"]
+```
+
+If you're running the miner in Docker, make sure to expose the Prometheus port and use the appropriate hostname (e.g., `tcpm:8080` if using Docker Compose).
+
+### Grafana Dashboard
+
+A pre-built Grafana dashboard is available to visualize your channel point mining activity.
+
+#### Screenshot
+
+![Grafana Dashboard](assets/grafana.png)
+
+#### Importing the Dashboard
+
+1. Import the dashboard:
+   - Go to **Dashboards** → **Import**
+   - Upload the dashboard JSON file from `assets/grafana-dashboard.json` or paste its contents
+   - Select your Prometheus data source
+   - Click **Import**
+
+> [!IMPORTANT]
+> Do not forget to add the Prometheus data source to Grafana before importing the dashboard.
+
+The dashboard will show:
+- Total channel points per streamer over time
+- Live status of monitored streamers
+- Viewer counts
+- Total mining users and streamers being monitored
+
+#### Dashboard JSON
+
+The dashboard JSON file is available at [`assets/grafana.json`](assets/grafana.json).

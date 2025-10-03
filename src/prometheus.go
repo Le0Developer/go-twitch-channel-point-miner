@@ -3,7 +3,6 @@ package miner
 import (
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -110,41 +109,7 @@ func (e *PrometheusExporter) UpdateMetrics() {
 func (e *PrometheusExporter) StartServer(port int) error {
 	e.UpdateMetrics()
 
-	go func() {
-		ticker := time.NewTicker(30 * time.Second)
-		defer ticker.Stop()
-
-		for range ticker.C {
-			e.UpdateMetrics()
-		}
-	}()
-
 	http.Handle("/metrics", promhttp.Handler())
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/html")
-		fmt.Fprint(w, `
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Twitch Channel Point Miner - Prometheus Exporter</title>
-</head>
-<body>
-    <h1>Twitch Channel Point Miner - Prometheus Exporter</h1>
-    <p>This is the Prometheus metrics exporter for the Twitch Channel Point Miner.</p>
-    <p><a href="/metrics">View Metrics</a></p>
-    
-    <h2>Available Metrics:</h2>
-    <ul>
-        <li><strong>twitch_channel_points</strong> - Current channel points for each user-streamer combination</li>
-        <li><strong>twitch_streamer_viewers</strong> - Current viewer count for each streamer</li>
-        <li><strong>twitch_streamer_live</strong> - Whether a streamer is currently live (1) or not (0)</li>
-        <li><strong>twitch_total_streamers</strong> - Total number of streamers being monitored</li>
-        <li><strong>twitch_total_users</strong> - Total number of users configured</li>
-    </ul>
-</body>
-</html>
-`)
-	})
 
 	fmt.Printf("Prometheus exporter starting on port %d\n", port)
 	fmt.Printf("Metrics available at http://localhost:%d/metrics\n", port)

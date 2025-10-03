@@ -209,6 +209,10 @@ func (miner *Miner) Run() error {
 				fmt.Println("Error updating versions", err)
 			}
 		}
+
+		if miner.Options.PrometheusEnabled && miner.PrometheusExporter != nil {
+			miner.PrometheusExporter.UpdateMetrics()
+		}
 	}
 }
 

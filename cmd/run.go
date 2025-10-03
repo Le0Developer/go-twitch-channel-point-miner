@@ -54,6 +54,7 @@ var (
 				PersistentFile:        viper.GetString("persistent.file"),
 				PrometheusEnabled:     viper.GetBool("prometheus.enabled"),
 				PrometheusPort:        viper.GetInt("prometheus.port"),
+				PrometheusHost:        viper.GetString("prometheus.host"),
 			}
 			addFollowers := viper.GetBool("streamers.follows")
 			instance := miner.NewMiner(options)

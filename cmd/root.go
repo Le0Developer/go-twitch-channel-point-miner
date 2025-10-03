@@ -59,6 +59,7 @@ func initConfig() {
 	viper.SetDefault("persistent.file", "persistent.json")
 	viper.SetDefault("prometheus.enabled", false)
 	viper.SetDefault("prometheus.port", 8080)
+	viper.SetDefault("prometheus.host", "localhost")
 
 	viper.AutomaticEnv()
 

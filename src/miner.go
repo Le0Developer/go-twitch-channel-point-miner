@@ -160,7 +160,7 @@ func (miner *Miner) Run() error {
 	if miner.Options.PrometheusEnabled {
 		miner.PrometheusExporter = NewPrometheusExporter(miner)
 		go func() {
-			if err := miner.PrometheusExporter.StartServer(miner.Options.PrometheusPort); err != nil {
+			if err := miner.PrometheusExporter.StartServer(miner.Options.PrometheusHost, miner.Options.PrometheusPort); err != nil {
 				fmt.Printf("Error starting Prometheus server: %v\n", err)
 			}
 		}()

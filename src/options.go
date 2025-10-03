@@ -28,6 +28,7 @@ type Options struct {
 
 	PrometheusEnabled bool
 	PrometheusPort    int
+	PrometheusHost    string
 }
 
 func (o Options) RequiresStreamActivity() bool {

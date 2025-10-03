@@ -29,6 +29,7 @@ func (miner *Miner) OnStreamDown(message WebsocketMessage) {
 
 	streamer.LastLivePing = time.Time{}
 	streamer.BroadcastID = ""
+	streamer.Viewers = 0
 }
 
 func (miner *Miner) OnViewcount(message WebsocketMessage) {

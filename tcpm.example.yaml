@@ -85,3 +85,9 @@ streamers:
 # List of your Twitch accounts. Run the login command to get your token
 users:
 
+# Prometheus metrics exporter configuration
+prometheus:
+    # Enable Prometheus metrics exporter
+    enabled: false
+    # Port to serve Prometheus metrics on
+    port: 8080

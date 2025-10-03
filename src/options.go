@@ -25,6 +25,9 @@ type Options struct {
 
 	PersistentFile string
 	DebugWebhook   string
+
+	PrometheusEnabled bool
+	PrometheusPort    int
 }
 
 func (o Options) RequiresStreamActivity() bool {

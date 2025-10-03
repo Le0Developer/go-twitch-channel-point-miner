@@ -52,6 +52,8 @@ var (
 				StreamerPriority:      map[string]int{},
 				DebugWebhook:          viper.GetString("debug.webhook"),
 				PersistentFile:        viper.GetString("persistent.file"),
+				PrometheusEnabled:     viper.GetBool("prometheus.enabled"),
+				PrometheusPort:        viper.GetInt("prometheus.port"),
 			}
 			addFollowers := viper.GetBool("streamers.follows")
 			instance := miner.NewMiner(options)

@@ -21,6 +21,8 @@ type Miner struct {
 
 	SpadeUrl string
 
+	PrometheusExporter *PrometheusExporter
+
 	Lock sync.Mutex
 }
 
@@ -152,6 +154,16 @@ func (miner *Miner) Run() error {
 	err := miner.UpdateVersions()
 	if err != nil {
 		return err
+	}
+
+	// Initialize and start Prometheus exporter if enabled
+	if miner.Options.PrometheusEnabled {
+		miner.PrometheusExporter = NewPrometheusExporter(miner)
+		go func() {
+			if err := miner.PrometheusExporter.StartServer(miner.Options.PrometheusPort); err != nil {
+				fmt.Printf("Error starting Prometheus server: %v\n", err)
+			}
+		}()
 	}
 
 	if miner.Options.MineWatchtime {
@@ -320,6 +332,7 @@ func NewMiner(options Options) *Miner {
 		map[string]*Prediction{},
 		state,
 		"",
+		nil,
 		sync.Mutex{},
 	}
 	return miner

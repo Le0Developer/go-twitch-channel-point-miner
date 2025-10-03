@@ -124,7 +124,7 @@ prometheus:
 After enabling, the metrics will be available at `http://localhost:8080/metrics` (or whatever host:port you configured).
 
 > [!TIP]
-> If you're running the miner in Docker, make sure to expose the Prometheus port in your `docker-compose.yml` file.
+> If you're running the miner in Docker, you may need to expose the Prometheus port in your `docker-compose.yml` file.
 > Only if you want to access it from outside the container.
 
 > [!WARNING]
@@ -153,11 +153,10 @@ A pre-built Grafana dashboard is available to visualize your channel point minin
 
 #### Importing the Dashboard
 
-1. Import the dashboard:
-   - Go to **Dashboards** → **Import**
-   - Upload the dashboard JSON file from `assets/grafana-dashboard.json` or paste its contents
-   - Select your Prometheus data source
-   - Click **Import**
+1. Go to **Dashboards** → **Import**
+2. Upload the dashboard JSON file from `assets/grafana.json` or paste its contents
+3. Select your Prometheus data source
+4. Click **Import**
 
 > [!IMPORTANT]
 > Do not forget to add the Prometheus data source to Grafana before importing the dashboard.

@@ -18,7 +18,7 @@ type PrometheusExporter struct {
 	totalUsers         prometheus.Gauge
 }
 
-func NewPrometheusExporter(miner *Miner) *PrometheusExporter {
+func NewPrometheusExporter(miner *Miner) (*PrometheusExporter, error) {
 	exporter := &PrometheusExporter{
 		miner: miner,
 
@@ -61,13 +61,31 @@ func NewPrometheusExporter(miner *Miner) *PrometheusExporter {
 		),
 	}
 
-	prometheus.MustRegister(exporter.streamerPoints)
-	prometheus.MustRegister(exporter.streamerViewers)
-	prometheus.MustRegister(exporter.streamerLiveStatus)
-	prometheus.MustRegister(exporter.totalStreamers)
-	prometheus.MustRegister(exporter.totalUsers)
+	if err := prometheus.Register(exporter.streamerPoints); err != nil {
+		return nil, fmt.Errorf("failed to register streamerPoints: %w", err)
+	}
+	if err := prometheus.Register(exporter.streamerViewers); err != nil {
+		return nil, fmt.Errorf("failed to register streamerViewers: %w", err)
+	}
+	if err := prometheus.Register(exporter.streamerLiveStatus); err != nil {
+		return nil, fmt.Errorf("failed to register streamerLiveStatus: %w", err)
+	}
+	if err := prometheus.Register(exporter.totalStreamers); err != nil {
+		return nil, fmt.Errorf("failed to register totalStreamers: %w", err)
+	}
+	if err := prometheus.Register(exporter.totalUsers); err != nil {
+		return nil, fmt.Errorf("failed to register totalUsers: %w", err)
+	}
 
-	return exporter
+	return exporter, nil
+}
+
+func (e *PrometheusExporter) Unregister() {
+	prometheus.Unregister(e.streamerPoints)
+	prometheus.Unregister(e.streamerViewers)
+	prometheus.Unregister(e.streamerLiveStatus)
+	prometheus.Unregister(e.totalStreamers)
+	prometheus.Unregister(e.totalUsers)
 }
 
 func (e *PrometheusExporter) UpdateMetrics() {

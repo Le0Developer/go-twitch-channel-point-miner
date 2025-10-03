@@ -106,13 +106,19 @@ func (e *PrometheusExporter) UpdateMetrics() {
 	}
 }
 
+func (e *PrometheusExporter) Handler() http.Handler {
+	mux := http.NewServeMux()
+	mux.Handle("/metrics", promhttp.Handler())
+	return mux
+}
+
 func (e *PrometheusExporter) StartServer(port int) error {
 	e.UpdateMetrics()
 
-	http.Handle("/metrics", promhttp.Handler())
+	handler := e.Handler()
 
 	fmt.Printf("Prometheus exporter starting on port %d\n", port)
 	fmt.Printf("Metrics available at http://localhost:%d/metrics\n", port)
 
-	return http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
+	return http.ListenAndServe(fmt.Sprintf(":%d", port), handler)
 }

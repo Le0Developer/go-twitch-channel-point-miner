@@ -106,16 +106,21 @@ func (e *PrometheusExporter) UpdateMetrics() {
 			).Set(float64(points))
 		}
 
-		// Update viewer count
-		e.streamerViewers.WithLabelValues(
-			streamer.Username,
-			streamer.ID,
-		).Set(float64(streamer.Viewers))
-
 		// Update live status
 		liveStatus := 0.0
 		if streamer.IsLive() {
 			liveStatus = 1.0
+			// Update viewer count
+			e.streamerViewers.WithLabelValues(
+				streamer.Username,
+				streamer.ID,
+			).Set(float64(streamer.Viewers))
+		} else {
+			// Update viewer count to 0 if not live
+			e.streamerViewers.WithLabelValues(
+				streamer.Username,
+				streamer.ID,
+			).Set(0)
 		}
 		e.streamerLiveStatus.WithLabelValues(
 			streamer.Username,

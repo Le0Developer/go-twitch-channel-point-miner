@@ -104,10 +104,12 @@ func (ws *WebsocketConnection) readMessage(data any) error {
 func (ws *WebsocketConnection) Disconnect() {
 	ws.log("Disconnecting from websocket")
 	if ws.conn != nil {
-		ws.conn.WriteClose(1000)
+		_ = ws.conn.WriteClose(1000)
 		ws.conn = nil
 	}
-	ws.pool.OnDisconnect(ws)
+	if err := ws.pool.OnDisconnect(ws); err != nil {
+		ws.log("Error handling disconnect in pool", err)
+	}
 }
 
 func (ws *WebsocketConnection) HandleKeepalive() {

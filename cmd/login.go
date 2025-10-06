@@ -15,7 +15,7 @@ func init() {
 	rootCmd.AddCommand(loginCmd)
 
 	loginCmd.Flags().StringVarP(&username, "username", "u", "", "Twitch username")
-	loginCmd.MarkFlagRequired("username")
+	must(loginCmd.MarkFlagRequired("username"))
 	loginCmd.Flags().BoolVarP(&save, "save", "s", false, "Save the token to the config file")
 }
 

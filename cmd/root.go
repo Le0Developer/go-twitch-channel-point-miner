@@ -16,7 +16,7 @@ var (
 		Short: "Twitch Channel Point Miner",
 		Long:  "An application for mining Twitch channel points.",
 		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Help()
+			must(cmd.Help())
 		},
 	}
 )
@@ -72,5 +72,11 @@ func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
+	}
+}
+
+func must(err error) {
+	if err != nil {
+		panic(err)
 	}
 }

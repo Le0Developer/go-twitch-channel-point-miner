@@ -16,7 +16,9 @@ func (miner *Miner) OnMoment(message WebsocketMessage) {
 
 	users := miner.GetUsersForStreamer(streamerID)
 	for _, user := range users {
-		user.GraphQL.ClaimMoment(event.Data.MomentID)
+		if err := user.GraphQL.ClaimMoment(event.Data.MomentID); err != nil {
+			fmt.Println("Failed to claim moment:", err)
+		}
 	}
 }
 

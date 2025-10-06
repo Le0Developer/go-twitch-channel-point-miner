@@ -40,9 +40,11 @@ func (gql *GraphQL) SendRequest(payload GraphQLRequest, ptr any) error {
 	if err != nil {
 		return err
 	}
-	defer response.Body.Close()
 
-	return json.NewDecoder(response.Body).Decode(ptr)
+	err = json.NewDecoder(response.Body).Decode(ptr)
+	_ = response.Body.Close()
+
+	return err
 }
 
 type GraphQLRequest struct {

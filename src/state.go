@@ -19,7 +19,9 @@ func (p *PersistentState) Save(opt Options) error {
 	if err != nil {
 		return err
 	}
-	defer fd.Close()
+	defer func() {
+		_ = fd.Close()
+	}()
 
 	encoder := json.NewEncoder(fd)
 	encoder.SetIndent("", "\t")
@@ -43,7 +45,9 @@ func LoadPersistentState(opt Options) *PersistentState {
 		fmt.Println("Failed to open persistent state file", err)
 		return freshPersistentState()
 	}
-	defer fd.Close()
+	defer func() {
+		_ = fd.Close()
+	}()
 
 	if err := json.NewDecoder(fd).Decode(&persistentState); err != nil {
 		fmt.Println("Failed to unmarshal persistent state", err)

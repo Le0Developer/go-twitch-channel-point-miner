@@ -15,7 +15,9 @@ func (miner *Miner) OnRaidUpdate(message WebsocketMessage) {
 	users := miner.GetUsersForStreamer(event.Raid.SourceID)
 
 	for _, user := range users {
-		user.GraphQL.JoinRaid(event.Raid.ID)
+		if err := user.GraphQL.JoinRaid(event.Raid.ID); err != nil {
+			fmt.Println("Failed to join raid:", err)
+		}
 	}
 }
 

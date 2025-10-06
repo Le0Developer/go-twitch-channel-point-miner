@@ -120,17 +120,23 @@ func (miner *Miner) GetUsersForStreamer(id string) []*User {
 func (miner *Miner) SubscribeToTopics() {
 	for _, user := range miner.Users {
 		channelPointsTopic := WebsocketTopic{Topic: "community-points-user-v1", User: user}
-		miner.WebsocketPool.ListenTopic(&channelPointsTopic)
+		if err := miner.WebsocketPool.ListenTopic(&channelPointsTopic); err != nil {
+			fmt.Println("Error listening to channel points topic", err)
+		}
 
 		if miner.Options.MinePredictions {
 			predictionTopic := WebsocketTopic{Topic: "predictions-user-v1", User: user}
-			miner.WebsocketPool.ListenTopic(&predictionTopic)
+			if err := miner.WebsocketPool.ListenTopic(&predictionTopic); err != nil {
+				fmt.Println("Error listening to predictions topic", err)
+			}
 		}
 	}
 	for _, streamer := range miner.Streamers {
 		if miner.Options.RequiresStreamActivity() {
 			videoPlaybackTopic := WebsocketTopic{Topic: "video-playback-by-id", Streamer: streamer}
-			miner.WebsocketPool.ListenTopic(&videoPlaybackTopic)
+			if err := miner.WebsocketPool.ListenTopic(&videoPlaybackTopic); err != nil {
+				fmt.Println("Error listening to video playback topic", err)
+			}
 		}
 
 		if miner.Options.MineRaids {
@@ -294,8 +300,8 @@ func (miner *Miner) UpdateVersions() error {
 	if err != nil {
 		return err
 	}
-	defer response.Body.Close()
 	text, err := io.ReadAll(response.Body)
+	_ = response.Body.Close()
 	if err != nil {
 		return err
 	}
@@ -313,8 +319,8 @@ func (miner *Miner) UpdateVersions() error {
 	if err != nil {
 		return err
 	}
-	defer response.Body.Close()
 	text, err = io.ReadAll(response.Body)
+	_ = response.Body.Close()
 	if err != nil {
 		return err
 	}

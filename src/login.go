@@ -86,15 +86,16 @@ func (l *LoginSession) CheckCode() (string, error) {
 		return "", err
 	}
 
-	if res.StatusCode == http.StatusOK {
+	switch res.StatusCode {
+	case http.StatusOK:
 		var response map[string]any
 		if err := json.NewDecoder(res.Body).Decode(&response); err != nil {
 			return "", err
 		}
 		return response["access_token"].(string), nil
-	} else if res.StatusCode == http.StatusForbidden {
+	case http.StatusForbidden:
 		return "", fmt.Errorf("authorization pending")
-	} else if res.StatusCode == http.StatusBadRequest {
+	case http.StatusBadRequest:
 		var response map[string]any
 		if err := json.NewDecoder(res.Body).Decode(&response); err != nil {
 			return "", err

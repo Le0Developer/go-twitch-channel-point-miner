@@ -81,11 +81,11 @@ func (miner *Miner) Alert(data ...any) {
 			fmt.Println("Error sending alert, status code:", res.StatusCode)
 			body, _ := io.ReadAll(res.Body)
 			fmt.Println("Response body:", string(body))
-			res.Body.Close()
+			_ = res.Body.Close()
 			time.Sleep(time.Second)
 			continue
 		}
-		res.Body.Close()
+		_ = res.Body.Close()
 		break
 	}
 }

@@ -28,7 +28,7 @@ var (
 					return
 				}
 				save = true
-				loginCmd.Execute()
+				must(loginCmd.Execute())
 			}
 
 			options := miner.Options{
@@ -65,7 +65,9 @@ var (
 				users = append(users, user)
 				instance.AddUser(user)
 				if addFollowers {
-					instance.AddStreamersFromFollows(user)
+					if err := instance.AddStreamersFromFollows(user); err != nil {
+						cmd.PrintErrln("Error adding streamers from follows for user", user.Username, ":", err)
+					}
 				}
 			}
 			priorities, ok := viper.Get("streamers.streamers").(map[string]any)

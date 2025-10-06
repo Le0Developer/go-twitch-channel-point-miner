@@ -76,7 +76,9 @@ func (miner *Miner) OnClaimAvailable(message WebsocketMessage) {
 
 	for _, user := range miner.Users {
 		if user.ID == userID {
-			user.GraphQL.ClaimBonus(streamer, claim.ID)
+			if err := user.GraphQL.ClaimBonus(streamer, claim.ID); err != nil {
+				fmt.Println("Failed to claim bonus:", err)
+			}
 		}
 	}
 }
@@ -198,8 +200,8 @@ func (miner *Miner) minePointsPlayback(streamer *Streamer, user *User) error {
 	}
 
 	// response is m3u8 list of qualities
-	defer response.Body.Close()
 	responseText, err := io.ReadAll(response.Body)
+	_ = response.Body.Close()
 	if err != nil {
 		return fmt.Errorf("failed to read response: %w", err)
 	}
@@ -225,8 +227,9 @@ func (miner *Miner) minePointsPlayback(streamer *Streamer, user *User) error {
 	}
 
 	// response is m3u8 playlist
-	defer response.Body.Close()
-	responseText, err = io.ReadAll(response.Body)
+	_, err = io.Copy(io.Discard, response.Body)
+	// responseText, err = io.ReadAll(response.Body)
+	// _ = response.Body.Close()
 	if err != nil {
 		return fmt.Errorf("failed to read response: %w", err)
 	}
@@ -305,9 +308,9 @@ func (miner *Miner) minePointsSpade(streamer *Streamer, user *User) error {
 	if err != nil {
 		return fmt.Errorf("failed to send request: %w", err)
 	}
-	defer response.Body.Close()
 
-	_, err = io.ReadAll(response.Body)
+	_, err = io.Copy(io.Discard, response.Body)
+	_ = response.Body.Close()
 	if err != nil {
 		return fmt.Errorf("failed to read response: %w", err)
 	}

@@ -73,6 +73,7 @@ func (c *Chat) handler(client *irc.Client, message *irc.Message) {
 		fmt.Println("[irc] Received message:", message)
 	}
 
+	var err error
 	switch message.Command {
 	case irc.RPL_ENDOFMOTD:
 		c.isConnected = true
@@ -80,9 +81,13 @@ func (c *Chat) handler(client *irc.Client, message *irc.Message) {
 	case "PRIVMSG":
 		c.message(message)
 	case "PING":
-		c.ping(message)
-		// case "CLEARCHAT":
-		// 	c.clearChat(message)
+		err = c.ping(message)
+	case "CLEARCHAT_DISABLED": // the _DISABLED suffix is just so the clearChat handler is marked as dead code
+		// currently disabled because its spammy
+		c.clearChat(message)
+	}
+	if err != nil {
+		fmt.Println("Error handling message:", err)
 	}
 }
 
@@ -121,41 +126,42 @@ func (c *Chat) RevalidateChannelSubscriptions() {
 	}
 	if len(channelsToLeave) > 0 {
 		fmt.Println("Leaving channels:", channelsToLeave)
-		c.leaveChannels(channelsToLeave)
+		if err := c.leaveChannels(channelsToLeave); err != nil {
+			fmt.Println("Failed to leave channels:", err)
+		}
 	}
 }
 
 func (c *Chat) joinChannels(channels []string) {
 	// we can join 20 channels per 10s
 	for i := 0; i < len(channels); i += 20 {
-		end := i + 20
-		if end > len(channels) {
-			end = len(channels)
-		}
+		end := min(i+20, len(channels))
 
 		message := &irc.Message{
 			Command: "JOIN",
 			Params:  []string{strings.Join(channels[i:end], ",")},
 		}
 
-		c.client.WriteMessage(message)
+		if err := c.client.WriteMessage(message); err != nil {
+			fmt.Println("Failed to join channels:", err)
+		}
 
 		time.Sleep(12 * time.Second)
 	}
 }
 
-func (c *Chat) leaveChannels(channels []string) {
-	c.client.WriteMessage(&irc.Message{
+func (c *Chat) leaveChannels(channels []string) error {
+	return c.client.WriteMessage(&irc.Message{
 		Command: "PART",
 		Params:  []string{strings.Join(channels, ",")},
 	})
 }
 
-func (c *Chat) ping(message *irc.Message) {
+func (c *Chat) ping(message *irc.Message) error {
 	msg := message.Copy()
 	msg.Command = "PONG"
 
-	c.client.WriteMessage(msg)
+	return c.client.WriteMessage(msg)
 }
 
 func (c *Chat) message(message *irc.Message) {
@@ -198,7 +204,7 @@ func (c *Chat) message(message *irc.Message) {
 		uniqueSenders = map[string]struct{}{}
 		ch.uniqueMessageSenders[content] = uniqueSenders
 	}
-	uniqueSenders[message.Prefix.Name] = struct{}{}
+	uniqueSenders[message.Name] = struct{}{}
 
 	if time.Since(ch.lastReset) > 15*time.Second {
 		ch.reset()
@@ -218,10 +224,14 @@ func (c *Chat) message(message *irc.Message) {
 			}
 		}
 		if rand.Float64() > chance {
-			go c.client.WriteMessage(&irc.Message{
-				Command: "PRIVMSG",
-				Params:  []string{channel, content},
-			})
+			go func() {
+				if err := c.client.WriteMessage(&irc.Message{
+					Command: "PRIVMSG",
+					Params:  []string{channel, content},
+				}); err != nil {
+					fmt.Println("Failed to send chat message:", err)
+				}
+			}()
 			go c.user.Miner.Alert(fmt.Sprintf("Followed spam: %s from %s", content, channel))
 		}
 	}

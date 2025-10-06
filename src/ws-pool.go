@@ -25,7 +25,7 @@ func (pool *WebsocketPool) ListenTopic(topic *WebsocketTopic) error {
 func (pool *WebsocketPool) UnlistenTopic(topic *WebsocketTopic) error {
 	index := slices.Index(pool.topics, topic)
 	if index != -1 {
-		pool.topics = append(pool.topics[:index], pool.topics[index+1:]...)
+		pool.topics = slices.Delete(pool.topics, index, index+1)
 	} else {
 		return fmt.Errorf("topic not found in pool")
 	}
@@ -57,21 +57,27 @@ func (pool *WebsocketPool) RevalidateTopics() error {
 
 	// TODO: this may send up to 50 INDIVIDUAL listen messages to the WS
 	// we should probably batch them
+	errors := []error{}
 	for _, topic := range missingTopics {
-		pool.SubmitTopic(topic)
+		if err := pool.SubmitTopic(topic); err != nil {
+			errors = append(errors, err)
+		}
+	}
+	if len(errors) > 0 {
+		return fmt.Errorf("errors revalidating topics: %v", errors)
 	}
 	return nil
 }
 
-func (pool *WebsocketPool) OnDisconnect(conn *WebsocketConnection) {
+func (pool *WebsocketPool) OnDisconnect(conn *WebsocketConnection) error {
 	fmt.Println("Connection disconnected", conn)
 	for i, c := range pool.connections {
 		if c == conn {
-			pool.connections = append(pool.connections[:i], pool.connections[i+1:]...)
+			pool.connections = slices.Delete(pool.connections, i, i+1)
 			break
 		}
 	}
-	pool.RevalidateTopics()
+	return pool.RevalidateTopics()
 }
 
 func NewWebsocketPool() *WebsocketPool {

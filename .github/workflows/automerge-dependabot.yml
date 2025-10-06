@@ -1,0 +1,59 @@
+name: CI - Build & Automerge Dependabot
+
+on:
+  pull_request:
+    branches:
+      - dev
+      - main
+      - master
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.24"
+
+      - name: Install dependencies
+        run: go mod tidy
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: v2.3
+
+      - name: Run other linters
+        run: go vet ./...
+
+      - name: Build
+        run: |
+          go build cmd/run.go
+
+  automerge:
+    if: |
+      github.actor == 'dependabot[bot]' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    needs: build
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}
+      cancel-in-progress: false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Enable automerge for Dependabot PR
+        uses: "peter-evans/enable-pull-request-automerge@v3"
+        with:
+          # Only enable if the build succeeded (needs: build)
+          pull-request-number: ${{ github.event.pull_request.number }}
+          merge-method: squash

@@ -5,7 +5,7 @@ go 1.23.0
 require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/prometheus/client_golang v1.23.2
-	github.com/spf13/cobra v1.9.1
+	github.com/spf13/cobra v1.10.1
 	github.com/spf13/viper v1.21.0
 	golang.org/x/net v0.43.0
 	gopkg.in/irc.v4 v4.0.0

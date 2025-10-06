@@ -1,13 +1,13 @@
 module github.com/le0developer/go-twitch-channel-point-miner
 
-go 1.23.0
+go 1.24.0
 
 require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/prometheus/client_golang v1.23.2
 	github.com/spf13/cobra v1.10.1
 	github.com/spf13/viper v1.21.0
-	golang.org/x/net v0.43.0
+	golang.org/x/net v0.44.0
 	gopkg.in/irc.v4 v4.0.0
 )
 
@@ -30,8 +30,8 @@ require (
 	github.com/subosito/gotenv v1.6.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/sys v0.35.0 // indirect
-	golang.org/x/text v0.28.0 // indirect
+	golang.org/x/sys v0.36.0 // indirect
+	golang.org/x/text v0.29.0 // indirect
 	golang.org/x/time v0.8.0 // indirect
 	google.golang.org/protobuf v1.36.8 // indirect
 )

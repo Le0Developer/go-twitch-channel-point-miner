@@ -21,6 +21,8 @@ type Miner struct {
 
 	SpadeUrl string
 
+	PrometheusExporter *PrometheusExporter
+
 	Lock sync.Mutex
 }
 
@@ -154,6 +156,20 @@ func (miner *Miner) Run() error {
 		return err
 	}
 
+	// Initialize and start Prometheus exporter if enabled
+	if miner.Options.PrometheusEnabled {
+		exporter, err := NewPrometheusExporter(miner)
+		if err != nil {
+			return fmt.Errorf("failed to initialize Prometheus exporter: %w", err)
+		}
+		miner.PrometheusExporter = exporter
+		go func() {
+			if err := miner.PrometheusExporter.StartServer(miner.Options.PrometheusHost, miner.Options.PrometheusPort); err != nil {
+				fmt.Printf("Error starting Prometheus server: %v\n", err)
+			}
+		}()
+	}
+
 	if miner.Options.MineWatchtime {
 		for _, user := range miner.Users {
 			fmt.Println("Connecting to chat for user", user.Username)
@@ -196,6 +212,10 @@ func (miner *Miner) Run() error {
 			if err != nil {
 				fmt.Println("Error updating versions", err)
 			}
+		}
+
+		if miner.Options.PrometheusEnabled && miner.PrometheusExporter != nil {
+			miner.PrometheusExporter.UpdateMetrics()
 		}
 	}
 }
@@ -320,6 +340,7 @@ func NewMiner(options Options) *Miner {
 		map[string]*Prediction{},
 		state,
 		"",
+		nil,
 		sync.Mutex{},
 	}
 	return miner

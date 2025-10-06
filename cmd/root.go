@@ -57,6 +57,9 @@ func initConfig() {
 	viper.SetDefault("streamers.follows", true)
 	viper.SetDefault("streamers.streamers", map[string]int{})
 	viper.SetDefault("persistent.file", "persistent.json")
+	viper.SetDefault("prometheus.enabled", false)
+	viper.SetDefault("prometheus.port", 8080)
+	viper.SetDefault("prometheus.host", "localhost")
 
 	viper.AutomaticEnv()
 

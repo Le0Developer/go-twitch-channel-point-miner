@@ -292,14 +292,18 @@ func (miner *Miner) minePointsSpade(streamer *Streamer, user *User) error {
 	if err != nil {
 		return fmt.Errorf("failed to marshal payload: %w", err)
 	}
-	if err := miner.submitModernSpade(user, payloadEncoded); err != nil {
-		return fmt.Errorf("failed to mine points on modern spade: %w", err)
+	err = miner.submitModernSpade(user, payloadEncoded)
+	if err != nil {
+		fmt.Printf("failed to mine points on modern spade: %v, falling back to legacy\n", err)
+	} else {
+		fmt.Println("Mined points for", streamer.Username, "on spade (modern)")
+		return nil
 	}
 	if err := miner.submitLegacySpade(user, payloadEncoded); err != nil {
 		return fmt.Errorf("failed to mine points on legacy spade: %w", err)
 	}
 
-	fmt.Println("Mined points for", streamer.Username, "on spade")
+	fmt.Println("Mined points for", streamer.Username, "on legacy spade")
 	return nil
 }
 

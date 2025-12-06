@@ -4,11 +4,12 @@ func (gql *GraphQL) PlaybackAccessToken(streamer *Streamer) (string, string, err
 	req := GraphQLRequest{
 		OperationName: "PlaybackAccessToken",
 		Variables: map[string]any{
-			"login":      streamer.Username,
-			"isLive":     true,
-			"isVod":      false,
-			"vodID":      "",
-			"playerType": "picture-by-picture",
+			"login":  streamer.Username,
+			"isLive": true,
+			"isVod":  false,
+			"vodID":  "",
+			// "playerType": "picture-by-picture",
+			"playerType": "site",
 		},
 		Extensions: GraphQLRequestExtensions{
 			PersistedQuery: GraphQLRequestExtensionsPersistedQuery{

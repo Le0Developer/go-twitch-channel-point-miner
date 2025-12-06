@@ -21,7 +21,7 @@ Create a `docker-compose.yml` file:
 ```yaml
 services:
   tcpm:
-    image: ghcr.io/le0developer/go-twitch-channel-point-miner:master
+    image: ghcr.io/le0developer/go-twitch-channel-point-miner:latest
     restart: unless-stopped
     command: ["run", "--login"]
     volumes:
@@ -111,14 +111,14 @@ Enable the Prometheus exporter in your `tcpm.yaml` configuration file:
 
 ```yaml
 prometheus:
-    # Enable Prometheus metrics exporter
-    enabled: true
-    # Port to serve Prometheus metrics on
-    port: 8080
-    # Host/interface to bind to (default: localhost for security)
-    # Use "localhost" or "127.0.0.1" to only allow local connections (recommended)
-    # Use "0.0.0.0" or "" to listen on all interfaces (publicly accessible unless firewalled)
-    host: localhost
+  # Enable Prometheus metrics exporter
+  enabled: true
+  # Port to serve Prometheus metrics on
+  port: 8080
+  # Host/interface to bind to (default: localhost for security)
+  # Use "localhost" or "127.0.0.1" to only allow local connections (recommended)
+  # Use "0.0.0.0" or "" to listen on all interfaces (publicly accessible unless firewalled)
+  host: localhost
 ```
 
 After enabling, the metrics will be available at `http://localhost:8080/metrics` (or whatever host:port you configured).
@@ -162,6 +162,7 @@ A pre-built Grafana dashboard is available to visualize your channel point minin
 > Do not forget to add the Prometheus data source to Grafana before importing the dashboard.
 
 The dashboard will show:
+
 - Total channel points per streamer over time
 - Live status of monitored streamers
 - Viewer counts

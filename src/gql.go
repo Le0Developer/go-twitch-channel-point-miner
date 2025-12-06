@@ -3,6 +3,7 @@ package miner
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -20,6 +21,11 @@ type GraphQL struct {
 }
 
 func (gql *GraphQL) SendRequest(payload GraphQLRequest, ptr any) error {
+	fmt.Println("GraphQL Request:", payload.OperationName)
+	return gql.SendRawRequest(payload, ptr)
+}
+
+func (gql *GraphQL) SendRawRequest(payload any, ptr any) error {
 	body, err := json.Marshal(payload)
 	if err != nil {
 		return err

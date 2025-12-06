@@ -1,7 +1,9 @@
 package miner
 
 import (
+	"bytes"
 	"cmp"
+	"compress/gzip"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -290,12 +292,45 @@ func (miner *Miner) minePointsSpade(streamer *Streamer, user *User) error {
 	if err != nil {
 		return fmt.Errorf("failed to marshal payload: %w", err)
 	}
-	payloadBase64encoded := base64.StdEncoding.EncodeToString(payloadEncoded)
+	if err := miner.submitModernSpade(user, payloadEncoded); err != nil {
+		return fmt.Errorf("failed to mine points on modern spade: %w", err)
+	}
+	if err := miner.submitLegacySpade(user, payloadEncoded); err != nil {
+		return fmt.Errorf("failed to mine points on legacy spade: %w", err)
+	}
 
+	fmt.Println("Mined points for", streamer.Username, "on spade")
+	return nil
+}
+
+func (miner *Miner) submitModernSpade(user *User, payload []byte) error {
+	var buffer bytes.Buffer
+	writer := gzip.NewWriter(&buffer)
+	if _, err := writer.Write(payload); err != nil {
+		return fmt.Errorf("failed to write gzip payload: %w", err)
+	}
+	_ = writer.Close()
+
+	body := map[string]any{
+		"query": "\n  mutation SendEvents($input: SendSpadeEventsInput!) {\n    sendSpadeEvents(input: $input) {\n      statusCode\n    }\n  }\n",
+		"variables": map[string]any{
+			"input": map[string]any{
+				"data":       base64.StdEncoding.EncodeToString(buffer.Bytes()),
+				"encoding":   "GZIP_B64",
+				"repository": "twilight",
+			},
+		},
+	}
+
+	var res any
+	return user.GraphQL.SendRawRequest(body, &res)
+}
+
+func (miner *Miner) submitLegacySpade(user *User, payload []byte) error {
+	payloadBase64encoded := base64.StdEncoding.EncodeToString(payload)
 	data := url.Values{
 		"data": []string{payloadBase64encoded},
 	}
-
 	body := strings.NewReader(data.Encode())
 
 	request, err := http.NewRequest("POST", miner.SpadeUrl, body)
@@ -315,6 +350,5 @@ func (miner *Miner) minePointsSpade(streamer *Streamer, user *User) error {
 		return fmt.Errorf("failed to read response: %w", err)
 	}
 
-	fmt.Println("Mined points for", streamer.Username, "on spade")
 	return nil
 }

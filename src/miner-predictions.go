@@ -16,6 +16,9 @@ func (miner *Miner) OnPredictionUpdate(message WebsocketMessage) {
 		return
 	}
 
+	miner.Lock.Lock()
+	defer miner.Lock.Unlock()
+
 	if event.Data.Event.Status == PredictionStatusResolved {
 		delete(miner.Predictions, event.Data.Event.ID)
 		fmt.Println("Prediction resolved", event.Data.Event.ID)

@@ -225,6 +225,7 @@ func (c *Chat) message(message *irc.Message) {
 		}
 		if rand.Float64() > chance {
 			go func() {
+				time.Sleep(time.Duration(rand.Float64() * 5 * float64(time.Second)))
 				if err := c.client.WriteMessage(&irc.Message{
 					Command: "PRIVMSG",
 					Params:  []string{channel, content},

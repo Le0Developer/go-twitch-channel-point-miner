@@ -211,11 +211,11 @@ func (p *Prediction) SmartBet() {
 
 	for _, user := range p.Miner.Users {
 		userBet := betAmount
-		if streamer.Points[user] < p.Miner.Options.PredictionsMinPoints {
-			continue
-		}
 		if userBet > streamer.Points[user] {
 			userBet = streamer.Points[user]
+		}
+		if pointsLeft := streamer.Points[user] - userBet; pointsLeft < p.Miner.Options.PredictionsMinPoints {
+			userBet = streamer.Points[user] - p.Miner.Options.PredictionsMinPoints
 		}
 		if userBet < 10 {
 			continue

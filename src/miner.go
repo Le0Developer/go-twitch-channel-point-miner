@@ -72,6 +72,9 @@ func (miner *Miner) AddStreamer(username string, user *User) *Streamer {
 		if err != nil {
 			// TODO: make this return an error
 			panic(err)
+		} else if id == "" {
+			fmt.Println("Could not find streamer ID for", username)
+			return nil
 		}
 
 		streamer = &Streamer{

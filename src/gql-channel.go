@@ -2,14 +2,14 @@ package miner
 
 func (gql *GraphQL) GetSteamerID(name string) (string, error) {
 	req := GraphQLRequest{
-		OperationName: "ReportMenuItem",
+		OperationName: "GetIDFromLogin",
 		Variables: map[string]any{
-			"channelLogin": name,
+			"login": name,
 		},
 		Extensions: GraphQLRequestExtensions{
 			PersistedQuery: GraphQLRequestExtensionsPersistedQuery{
 				Version:    1,
-				Sha256Hash: "8f3628981255345ca5e5453dfd844efffb01d6413a9931498836e6268692a30c",
+				Sha256Hash: "94e82a7b1e3c21e186daa73ee2afc4b8f23bade1fbbff6fe8ac133f50a2f58ca",
 			},
 		},
 	}

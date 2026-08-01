@@ -210,10 +210,7 @@ func (p *Prediction) SmartBet() {
 	streamer := p.Miner.GetStreamerByID(p.Event.ChannelID)
 
 	for _, user := range p.Miner.Users {
-		userBet := betAmount
-		if userBet > streamer.Points[user] {
-			userBet = streamer.Points[user]
-		}
+		userBet := min(betAmount, streamer.Points[user])
 		if pointsLeft := streamer.Points[user] - userBet; pointsLeft < p.Miner.Options.PredictionsMinPoints {
 			userBet = streamer.Points[user] - p.Miner.Options.PredictionsMinPoints
 		}

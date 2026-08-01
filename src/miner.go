@@ -309,7 +309,8 @@ func (miner *Miner) UpdateVersions() error {
 		return err
 	}
 
-	buildID := strings.Split(strings.Split(string(text), "__twilightBuildID=\"")[1], "\"")[0]
+	_, buildID, _ := strings.Cut(string(text), "__twilightBuildID=\"")
+	buildID, _, _ = strings.Cut(buildID, "\"")
 	for _, user := range miner.Users {
 		user.GraphQL.ClientVersion = buildID
 	}
@@ -328,7 +329,8 @@ func (miner *Miner) UpdateVersions() error {
 		return err
 	}
 
-	spadeUrl := strings.Split(strings.Split(string(text), "\"spade_url\":\"")[1], "\"")[0]
+	_, spadeUrl, _ := strings.Cut(string(text), "\"spade_url\":\"")
+	spadeUrl, _, _ = strings.Cut(spadeUrl, "\"")
 	miner.SpadeUrl = spadeUrl
 
 	fmt.Println("Spade URL", spadeUrl)

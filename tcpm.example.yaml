@@ -72,6 +72,10 @@ chat:
     #   6. At least 2 subscribers participated
     #   7. Resets after 15s. Minimum cooldown between messages of 10s
     follow_chat_spam: false
+    # Optional per-channel overrides. Channel names may be written with or without the leading #.
+    # These values override follow_chat_spam for the matching channel.
+    follow_chat_spam_channels:
+        example_channel: true
 
 # Which streamers to mine. Applies to all features.
 streamers:

@@ -1,5 +1,7 @@
 package miner
 
+import "strings"
+
 type Options struct {
 	MinePoints           bool
 	PrioritizeStreaks    bool
@@ -11,9 +13,10 @@ type Options struct {
 	MineRaids   bool
 	MineMoments bool
 
-	MineWatchtime     bool
-	WatchTimeOnlyLive bool
-	FollowChatSpam    bool
+	MineWatchtime          bool
+	WatchTimeOnlyLive      bool
+	FollowChatSpam         bool
+	FollowChatSpamChannels map[string]bool
 
 	MinePredictions       bool
 	PredictionsDataPoints int
@@ -29,6 +32,20 @@ type Options struct {
 	PrometheusEnabled bool
 	PrometheusPort    int
 	PrometheusHost    string
+}
+
+func (o Options) FollowChatSpamForChannel(channel string) bool {
+	if enabled, ok := o.FollowChatSpamChannels[channel]; ok {
+		return enabled
+	}
+	channel = strings.TrimPrefix(strings.ToLower(channel), "#")
+	for configuredChannel, enabled := range o.FollowChatSpamChannels {
+		if strings.TrimPrefix(strings.ToLower(configuredChannel), "#") == channel {
+			return enabled
+		}
+	}
+
+	return o.FollowChatSpam
 }
 
 func (o Options) RequiresStreamActivity() bool {

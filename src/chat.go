@@ -165,7 +165,8 @@ func (c *Chat) ping(message *irc.Message) error {
 }
 
 func (c *Chat) message(message *irc.Message) {
-	if !c.user.Miner.Options.FollowChatSpam {
+	channel := message.Params[0]
+	if !c.user.Miner.Options.FollowChatSpamForChannel(channel) {
 		return
 	}
 
@@ -180,8 +181,6 @@ func (c *Chat) message(message *irc.Message) {
 	if strings.ContainsAny(content, ".!+ ") || len(content) > 20 {
 		return
 	}
-
-	channel := message.Params[0]
 
 	ch, ok := c.channelState[channel]
 	if !ok {

@@ -32,29 +32,30 @@ var (
 			}
 
 			options := miner.Options{
-				MinePoints:            viper.GetBool("mine.points"),
-				PrioritizeStreaks:     viper.GetBool("points.prioritize_streaks"),
-				ConcurrentPointLimit:  viper.GetInt("points.concurrent_point_limit"),
-				ConcurrentWatchLimit:  viper.GetInt("points.concurrent_watch_limit"),
-				MiningStrategy:        miner.MiningStrategy(viper.GetString("points.strategy")),
-				MineRaids:             viper.GetBool("mine.raids"),
-				MineMoments:           viper.GetBool("mine.moments"),
-				MinePredictions:       viper.GetBool("mine.predictions"),
-				PredictionsMinPoints:  viper.GetInt("predictions.min_points"),
-				PredictionsMaxBet:     viper.GetInt("predictions.max_bet"),
-				PredictionsMaxRatio:   viper.GetInt("predictions.max_ratio"),
-				PredictionsStealth:    viper.GetBool("predictions.stealth"),
-				PredictionsStrategy:   miner.PredictionStrategy(viper.GetString("predictions.strategy")),
-				PredictionsDataPoints: viper.GetInt("predictions.min_data_points"),
-				MineWatchtime:         viper.GetBool("mine.watchtime"),
-				WatchTimeOnlyLive:     viper.GetBool("chat.only_live"),
-				FollowChatSpam:        viper.GetBool("chat.follow_chat_spam"),
-				StreamerPriority:      map[string]int{},
-				DebugWebhook:          viper.GetString("debug.webhook"),
-				PersistentFile:        viper.GetString("persistent.file"),
-				PrometheusEnabled:     viper.GetBool("prometheus.enabled"),
-				PrometheusPort:        viper.GetInt("prometheus.port"),
-				PrometheusHost:        viper.GetString("prometheus.host"),
+				MinePoints:             viper.GetBool("mine.points"),
+				PrioritizeStreaks:      viper.GetBool("points.prioritize_streaks"),
+				ConcurrentPointLimit:   viper.GetInt("points.concurrent_point_limit"),
+				ConcurrentWatchLimit:   viper.GetInt("points.concurrent_watch_limit"),
+				MiningStrategy:         miner.MiningStrategy(viper.GetString("points.strategy")),
+				MineRaids:              viper.GetBool("mine.raids"),
+				MineMoments:            viper.GetBool("mine.moments"),
+				MinePredictions:        viper.GetBool("mine.predictions"),
+				PredictionsMinPoints:   viper.GetInt("predictions.min_points"),
+				PredictionsMaxBet:      viper.GetInt("predictions.max_bet"),
+				PredictionsMaxRatio:    viper.GetInt("predictions.max_ratio"),
+				PredictionsStealth:     viper.GetBool("predictions.stealth"),
+				PredictionsStrategy:    miner.PredictionStrategy(viper.GetString("predictions.strategy")),
+				PredictionsDataPoints:  viper.GetInt("predictions.min_data_points"),
+				MineWatchtime:          viper.GetBool("mine.watchtime"),
+				WatchTimeOnlyLive:      viper.GetBool("chat.only_live"),
+				FollowChatSpam:         viper.GetBool("chat.follow_chat_spam"),
+				FollowChatSpamChannels: getBoolMap("chat.follow_chat_spam_channels"),
+				StreamerPriority:       map[string]int{},
+				DebugWebhook:           viper.GetString("debug.webhook"),
+				PersistentFile:         viper.GetString("persistent.file"),
+				PrometheusEnabled:      viper.GetBool("prometheus.enabled"),
+				PrometheusPort:         viper.GetInt("prometheus.port"),
+				PrometheusHost:         viper.GetString("prometheus.host"),
 			}
 			addFollowers := viper.GetBool("streamers.follows")
 			instance := miner.NewMiner(options)
@@ -90,4 +91,17 @@ var (
 func init() {
 	rootCmd.AddCommand(runCmd)
 	runCmd.Flags().BoolVarP(&autoLogin, "login", "l", false, "Automatically login if no users are found")
+}
+
+func getBoolMap(key string) map[string]bool {
+	values := map[string]bool{}
+	for channel, value := range viper.GetStringMap(key) {
+		switch value := value.(type) {
+		case bool:
+			values[channel] = value
+		case string:
+			values[channel] = viper.GetBool(key + "." + channel)
+		}
+	}
+	return values
 }
